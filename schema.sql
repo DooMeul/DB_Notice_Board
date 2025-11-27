@@ -1,4 +1,4 @@
-create database tododb DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+create database notice_board DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 -- Drop tables if they exist to prevent errors on re-creation
 DROP TABLE IF EXISTS users;
@@ -57,12 +57,12 @@ CREATE TABLE comments (
 
 -- Sample posts
 INSERT INTO posts (user_id, title, content) VALUES
-    (2, '첫 번째 게시물입니다', '테스트용 샘플 게시물 내용입니다. 환영합니다!'),
-    (3, '두번째 게시물', '두번째 게시물의 본문입니다. 게시판 기능 테스트용.'),
-    (1, '관리자 공지', '관리자 계정으로 작성된 공지사항입니다.');
+    (2, '첫 번째 게시물', '테스트1'),
+    (3, '두 번째 게시물', '테스트2.'),
+    (1, '관리자 공지', '공지사항');
 
 -- Sample comments
 INSERT INTO comments (post_id, user_id, content) VALUES
-    (1, 3, '좋은 글 감사합니다!'),
-    (1, 2, '테스트 댓글입니다.'),
-    (2, 2, '두번째 게시물에 대한 의견입니다.');
+    (1, 3, '테스트 댓1'),
+    (1, 2, '테스트 댓2'),
+    (2, 2, '테스트 댓3');
