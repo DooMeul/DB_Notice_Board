@@ -18,6 +18,25 @@
 
     <a href="/posts/new">새 글 작성</a>
 
+    <!-- Admin (pinned) posts shown at top of page 1 -->
+    <% if (adminPosts && adminPosts.length > 0 && currentPage === 1) { %>
+      <h2>공지사항</h2>
+      <ul class="admin-post-list">
+        <% adminPosts.forEach(function(a){ %>
+          <li class="admin-post">
+            <a href="/posts/<%= a.post_id %>"><strong>[공지]</strong> <%= a.title %></a>
+            <small>by <%= a.user_name || '관리자' %> | 조회수 <%= a.view_count %> | <%= new Date(a.created_at).toLocaleString('ko-KR') %></small>
+            <% if (user && (user.user_id === a.user_id || user.email === 'admin@example.com')) { %>
+              <form action="/posts/<%= a.post_id %>/delete" method="POST" style="display:inline;">
+                <button type="submit" onclick="return confirm('삭제하시겠습니까?')">삭제</button>
+              </form>
+            <% } %>
+          </li>
+        <% }); %>
+      </ul>
+      <hr>
+    <% } %>
+
     <ul class="post-list">
       <% posts.forEach(function(p){ %>
         <li>

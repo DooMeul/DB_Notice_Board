@@ -11,34 +11,50 @@ function ensureLoggedIn(req, res, next) {
 router.get('/', (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = 5;
-  const offset = (page - 1) * limit;
   const search = req.query.search ? `%${req.query.search}%` : null;
 
-  const countSql = search
-    ? 'SELECT COUNT(*) AS count FROM posts WHERE title LIKE ?'
-    : 'SELECT COUNT(*) AS count FROM posts';
+  // First, fetch admin posts (pinned notices)
+  const adminEmail = 'admin@example.com';
+  const adminSql = 'SELECT p.*, u.user_name, u.email FROM posts p LEFT JOIN users u ON p.user_id = u.user_id WHERE u.email = ? ORDER BY p.post_id DESC';
 
-  const listSql = search
-    ? 'SELECT p.*, u.user_name FROM posts p LEFT JOIN users u ON p.user_id = u.user_id WHERE p.title LIKE ? ORDER BY p.post_id DESC LIMIT ? OFFSET ?'
-    : 'SELECT p.*, u.user_name FROM posts p LEFT JOIN users u ON p.user_id = u.user_id ORDER BY p.post_id DESC LIMIT ? OFFSET ?';
-
-  const countParams = search ? [search] : [];
-  const listParams = search ? [search, limit, offset] : [limit, offset];
-
-  db.query(countSql, countParams, (err, countResult) => {
+  db.query(adminSql, [adminEmail], (err, adminRows) => {
     if (err) throw err;
-    const total = countResult[0].count;
-    const totalPages = Math.ceil(total / limit);
 
-    db.query(listSql, listParams, (err, posts) => {
+    // Count normal posts (exclude admin posts)
+    let countSql = 'SELECT COUNT(*) AS count FROM posts p LEFT JOIN users u ON p.user_id = u.user_id WHERE (u.email IS NULL OR u.email <> ?)';
+    let countParams = [adminEmail];
+    if (search) {
+      countSql = 'SELECT COUNT(*) AS count FROM posts p LEFT JOIN users u ON p.user_id = u.user_id WHERE p.title LIKE ? AND (u.email IS NULL OR u.email <> ?)';
+      countParams = [search, adminEmail];
+    }
+
+    db.query(countSql, countParams, (err, countResult) => {
       if (err) throw err;
-      res.render('posts/index', {
-        title: '게시판',
-        user: req.session.user,
-        posts: posts,
-        currentPage: page,
-        totalPages: totalPages,
-        search: req.query.search || ''
+      const total = countResult[0].count;
+      const totalPages = Math.ceil(total / limit) || 1;
+
+      // For normal posts, exclude admin posts
+      let listSql;
+      let listParams;
+      if (search) {
+        listSql = 'SELECT p.*, u.user_name FROM posts p LEFT JOIN users u ON p.user_id = u.user_id WHERE p.title LIKE ? AND (u.email IS NULL OR u.email <> ?) ORDER BY p.post_id DESC LIMIT ? OFFSET ?';
+        listParams = [search, adminEmail, limit, (page - 1) * limit];
+      } else {
+        listSql = 'SELECT p.*, u.user_name FROM posts p LEFT JOIN users u ON p.user_id = u.user_id WHERE (u.email IS NULL OR u.email <> ?) ORDER BY p.post_id DESC LIMIT ? OFFSET ?';
+        listParams = [adminEmail, limit, (page - 1) * limit];
+      }
+
+      db.query(listSql, listParams, (err, posts) => {
+        if (err) throw err;
+        res.render('posts/index', {
+          title: '게시판',
+          user: req.session.user,
+          adminPosts: adminRows, // pinned notices
+          posts: posts,
+          currentPage: page,
+          totalPages: totalPages,
+          search: req.query.search || ''
+        });
       });
     });
   });
