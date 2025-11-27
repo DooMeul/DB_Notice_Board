@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/nav.css">
+</head>
+<body>
+  <%- include('../partials/nav', { title: title, user: user }) %>
+  <div class="container">
+    <h1><%= post.title %></h1>
+    <div>
+      <small>by <%= post.user_name || '익명' %> | 조회수 <%= post.view_count %> | <%= new Date(post.created_at).toLocaleString('ko-KR') %></small>
+    </div>
+    <div class="post-content"><%= post.content %></div>
+
+    <% if (user && (user.user_id === post.user_id || user.email === 'admin@example.com')) { %>
+      <% if (user.user_id === post.user_id) { %>
+        <a href="/posts/<%= post.post_id %>/edit">수정</a>
+      <% } %>
+      <form action="/posts/<%= post.post_id %>/delete" method="POST" style="display:inline;">
+        <button type="submit" onclick="return confirm('삭제하시겠습니까?')">삭제</button>
+      </form>
+    <% } %>
+
+    <hr>
+    <h3>댓글</h3>
+    <ul>
+      <% comments.forEach(function(c){ %>
+        <li>
+          <strong><%= c.user_name || '익명' %></strong> <small><%= new Date(c.created_at).toLocaleString('ko-KR') %></small>
+          <div><%= c.content %></div>
+          <% if (user && (user.user_id === c.user_id || user.email === 'admin@example.com')) { %>
+            <form action="/posts/comments/<%= c.comment_id %>/delete" method="POST" style="display:inline;">
+              <button type="submit">삭제</button>
+            </form>
+          <% } %>
+        </li>
+      <% }) %>
+    </ul>
+
+    <% if (user) { %>
+      <form action="/posts/<%= post.post_id %>/comments" method="POST">
+        <textarea name="content" rows="3" required></textarea>
+        <button type="submit">댓글 작성</button>
+      </form>
+    <% } else { %>
+      <p><a href="/login">로그인</a> 후 댓글을 작성할 수 있습니다.</p>
+    <% } %>
+  </div>
+</body>
+</html>

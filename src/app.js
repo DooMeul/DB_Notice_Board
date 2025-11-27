@@ -23,9 +23,11 @@ app.use(session({
 const indexRouter = require('./routes/index');
 const todosRouter = require('./routes/todos');
 const adminRouter = require('./routes/admin');
+const postsRouter = require('./routes/posts');
 
 app.use('/', indexRouter);
 app.use('/todos', todosRouter);
+app.use('/posts', postsRouter);
 app.use('/admin', adminRouter);
 
 app.listen(port, () => {

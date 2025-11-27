@@ -33,7 +33,6 @@ router.post('/login', (req, res) => {
         }
     });
 });
-
 // Handle signup
 router.post('/signup', (req, res) => {
     const { username, email, password } = req.body;

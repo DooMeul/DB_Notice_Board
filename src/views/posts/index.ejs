@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/nav.css">
+</head>
+<body>
+  <%- include('../partials/nav', { title: title, user: user }) %>
+  <div class="container">
+    <h1>게시판</h1>
+
+    <form method="GET" action="/posts">
+      <input type="text" name="search" placeholder="제목 검색" value="<%= search %>">
+      <button type="submit">검색</button>
+    </form>
+
+    <a href="/posts/new">새 글 작성</a>
+
+    <ul class="post-list">
+      <% posts.forEach(function(p){ %>
+        <li>
+          <a href="/posts/<%= p.post_id %>"><%= p.title %></a>
+          <small>by <%= p.user_name || '익명' %> | 조회수 <%= p.view_count %> | <%= new Date(p.created_at).toLocaleString('ko-KR') %></small>
+          <% if (user && (user.user_id === p.user_id || user.email === 'admin@example.com')) { %>
+            <form action="/posts/<%= p.post_id %>/delete" method="POST" style="display:inline;">
+              <button type="submit" onclick="return confirm('삭제하시겠습니까?')">삭제</button>
+            </form>
+          <% } %>
+        </li>
+      <% }) %>
+    </ul>
+
+    <div class="pagination">
+      <% if (currentPage > 1) { %>
+        <a href="/posts?page=<%= currentPage - 1 %>&search=<%= encodeURIComponent(search) %>">이전</a>
+      <% } %>
+      <span><%= currentPage %> / <%= totalPages %></span>
+      <% if (currentPage < totalPages) { %>
+        <a href="/posts?page=<%= currentPage + 1 %>&search=<%= encodeURIComponent(search) %>">다음</a>
+      <% } %>
+    </div>
+  </div>
+</body>
+</html>

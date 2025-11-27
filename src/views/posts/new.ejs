@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/nav.css">
+</head>
+<body>
+  <%- include('../partials/nav', { title: title, user: user }) %>
+  <div class="container">
+    <h1>새 글 작성</h1>
+    <form action="/posts" method="POST">
+      <div>
+        <label>제목</label>
+        <input type="text" name="title" required>
+      </div>
+      <div>
+        <label>내용</label>
+        <textarea name="content" rows="8" required></textarea>
+      </div>
+      <button type="submit">작성</button>
+    </form>
+  </div>
+</body>
+</html>
